@@ -140,13 +140,23 @@ end sub
 
 
 sub SetDefaultAudioTrack(itemData)
-    for i = 0 to itemData.mediaStreams.Count() - 1
-        if itemData.mediaStreams[i].Type = "Audio"
-            m.top.selectedAudioStreamIndex = i
-            setFieldText("audio_codec", tr("Audio") + ": " + itemData.mediaStreams[i].displayTitle)
-            exit for
+    audioTrackIdx = -1
+    found_first = false
+    for each item in itemData.mediaStreams
+        if item.type = "Audio"
+            if not found_first
+                found_first = true
+                audioTrackIdx = item.index 'Select first track, in case no default track exists
+            end if
+            if item.IsDefault
+                audioTrackIdx = item.index 'Default track found, update index
+                exit for
+            end if
         end if
     end for
+    if found_first ' If no track is found, do not populate any info
+        setFieldText("audio_codec", tr("Audio") + ": " + itemData.mediaStreams[audioTrackIdx].displayTitle)
+    end if
 end sub
 
 sub setFieldText(field, value)
